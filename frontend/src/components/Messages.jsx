@@ -10,6 +10,7 @@ const Messages = ({ selectedUser }) => {
     // Hooks to get real-time messages and all messages
     useGetRTM();
     useGetAllMessage();
+    
 
     // Access the messages and user from the redux store
     const { messages } = useSelector(store => store.chat);

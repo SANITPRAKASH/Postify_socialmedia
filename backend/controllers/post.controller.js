@@ -48,18 +48,18 @@ export const addNewPost = async (req, res) => {
 
 export const getAllPost = async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 })
-            .populate({ path: 'author', select: 'username profilePicture' })
+        const posts = await Post.find().sort({ createdAt: -1 })//sorting the posts by the date of creation
+            .populate({ path: 'author', select: 'username , profilePicture' })//populating the author of the post
             .populate({
                 path: 'comments',
-                sort: { createdAt: -1 },
+                sort: { createdAt: -1 },//sorting the comments by the date of creation
                 populate: {
                     path: 'author',
-                    select: 'username profilePicture'
+                    select: 'username , profilePicture'//selecting the username and profile picture of the author
                 }
             });
         return res.status(200).json({
-            posts,
+            posts,//sending the posts to the client
             success: true
         });
     } catch (error) {
@@ -98,11 +98,11 @@ export const likePost = async (req, res) => {
         if (!post) return res.status(404).json({ message: 'Post not found', success: false });
 
         // like logic started
-        await post.updateOne({ $addToSet: { likes: userIdLiking } });
+        await post.updateOne({ $addToSet: { likes: userIdLiking } });// addToSet makes sure that the user is not added twice
         await post.save();
 
         // implement socket io for real time notification
-        const user = await User.findById(userIdLiking).select('username profilePicture');
+        const user = await User.findById(userIdLiking).select('username, profilePicture');
 
         const postOwnerId = post.author.toString();
         if(postOwnerId !== userIdLiking){
@@ -175,7 +175,7 @@ export const addComment = async (req, res) => {
 
         await comment.populate({
             path: 'author',
-            select: "username profilePicture"
+            select: "username, profilePicture"
         });
 
         post.comments.push(comment._id);
@@ -196,7 +196,7 @@ export const getCommentsOfPost = async (req, res) => {
     try {
         const postId = req.params.id;
 
-        const comments = await Comment.find({ post: postId }).populate('author', 'username profilePicture');
+        const comments = await Comment.find({ post: postId }).populate('author', 'username, profilePicture');
 
         if (!comments) return res.status(404).json({ message: 'No comments found for this post', success: false });
 
@@ -221,9 +221,9 @@ export const deletePost = async (req, res) => {
         // delete post
         await Post.findByIdAndDelete(postId);
 
-        // remove the post id from the user's post
+        // after deleting the post, remove the post id from the user's post
         let user = await User.findById(authorId);
-        user.posts = user.posts.filter(id => id.toString() !== postId);
+        user.posts = user.posts.filter(id => id.toString() !== postId);// filter out  and give the posts id not equal to the post id from the deleted post id
         await user.save();
 
         // delete associated comments
@@ -264,3 +264,4 @@ export const bookmarkPost = async (req, res) => {
         console.log(error);
     }
 }
+ 

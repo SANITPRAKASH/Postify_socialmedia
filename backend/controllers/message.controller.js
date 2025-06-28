@@ -34,16 +34,16 @@ export const sendMessage = async (req, res) => {
         });
 
         // Link the message to the conversation
-        conversation.messages.push(newMessage._id);
+        if(newMessage)conversation.messages.push(newMessage._id);
 
         // Save conversation and message
         await Promise.all([conversation.save(), newMessage.save()]);
 
         // Emit the message to the receiver if they are online
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if (receiverSocketId && io) {
-            io.to(receiverSocketId).emit("newMessage", newMessage);
-        }
+        // const receiverSocketId = getReceiverSocketId(receiverId);
+        // if (receiverSocketId && io) {
+        //     io.to(receiverSocketId).emit("newMessage", newMessage);
+        // }
 
         // Send response
         return res.status(201).json({
@@ -66,9 +66,10 @@ export const getMessage = async (req, res) => {
         const receiverId = req.params.id; // Receiver's ID from URL params
 
         // Fetch the conversation between the participants
-        const conversation = await Conversation.findOne({
+        const conversation = await Conversation.find({
             participants: { $all: [senderId, receiverId] },
-        }).populate("messages");
+        })
+        // .populate("messages");
 
         // If no conversation exists, return an empty array
         if (!conversation) {
@@ -78,7 +79,7 @@ export const getMessage = async (req, res) => {
         // Send the messages in the conversation
         return res.status(200).json({
             success: true,
-            messages: conversation.messages,
+            messages: conversation?.messages,
         });
     } catch (error) {
         console.error("Error in getMessage:", error);

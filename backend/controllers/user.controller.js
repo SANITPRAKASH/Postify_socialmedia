@@ -23,10 +23,10 @@ export const register = async (req, res) => {
 
         await User.create({ username, email, password: hashedPassword });
 
-        res.status(201).json({ message: "Account created successfully.", success: true });
+       return res.status(201).json({ message: "Account created successfully.", success: true });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -39,8 +39,12 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "All fields are required!", success: false });
         }
 
-        const user = await User.findOne({ email });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+        let user = await User.findOne({ email });
+        if (!user ) {
+            return res.status(401).json({ message: "Incorrect email or password", success: false });
+        }
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
             return res.status(401).json({ message: "Invalid credentials", success: false });
         }
 
@@ -53,37 +57,54 @@ export const login = async (req, res) => {
                 return post?.author.equals(user._id) ? post : null;
             })
         );
+        user={
+            _id:user._id,
+            username:user.username,
+            email:user.email,
+            profilePicture:user.profilePicture,
+            bio:user.bio,
+            followers:user.followers,
+            following:user.following,
+            posts:populatedPosts
+
+        }
 
         res.cookie('token', token, { httpOnly: true, sameSite: 'strict', maxAge: 86400000 }).json({
             message: `Welcome back ${user.username}`,
             success: true,
-            user: { ...user.toObject(), posts: populatedPosts }
+            user
         });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
 // Logout User
 export const logout = (_, res) => {
-    res.cookie("token", "", { maxAge: 0 }).json({ message: "Logged out successfully.", success: true });
+    try {
+        return res.cookie("token", "", { maxAge: 0 }).json({ message: "Logged out successfully.", success: true });
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Server error", success: false });
+    }
 };
 
 // Get User Profile
 export const getProfile = async (req, res) => {
     try {
         const userId = req.params.id;
-        const user = await User.findById(userId).populate("posts").populate("bookmarks");
+        let user = await User.findById(userId).select("-password").populate("posts").populate("bookmarks");
 
         if (!user) {
             return res.status(404).json({ message: "User not found", success: false });
         }
 
-        res.status(200).json({ user, success: true });
+       return  res.status(200).json({ user, success: true });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -109,26 +130,26 @@ export const editProfile = async (req, res) => {
         }
 
         await user.save();
-        res.status(200).json({ message: "Profile updated", success: true, user });
+        return res.status(200).json({ message: "Profile updated", success: true, user });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
 // Get Suggested Users
 export const getSuggestedUsers = async (req, res) => {
     try {
-        const users = await User.find({ _id: { $ne: req.id } }).select("-password");
+        const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select("-password");//$ne means not equal to
 
-        if (!users.length) {
-            return res.status(404).json({ message: "No users found", success: false });
+        if (!suggestedUsers || suggestedUsers.length === 0) {
+            return res.status(404).json({ message: "Currently don not have any suggested users", success: false });
         }
 
-        res.status(200).json({ users, success: true });
+        return res.status(200).json({ suggestedUsers, success: true, users:suggestedUsers });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
 
@@ -155,6 +176,7 @@ export const followOrUnfollow = async (req, res) => {
             await Promise.all([
                 User.updateOne({ _id: userId }, { $pull: { following: targetUserId } }),
                 User.updateOne({ _id: targetUserId }, { $pull: { followers: userId } })
+                //we are pulling the userId from the following array of the targetUser and the userId from the followers array of the targetUser here we using two documents hence use Promise.all
             ]);
 
             return res.status(200).json({ message: "Unfollowed successfully", success: true });
@@ -162,12 +184,13 @@ export const followOrUnfollow = async (req, res) => {
             await Promise.all([
                 User.updateOne({ _id: userId }, { $push: { following: targetUserId } }),
                 User.updateOne({ _id: targetUserId }, { $push: { followers: userId } })
+                //we are pushing the userId to the following array of the targetUser and the userId to the followers array of the targetUser here we using two documents hence use Promise.all
             ]);
 
             return res.status(200).json({ message: "Followed successfully", success: true });
         }
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Server error", success: false });
+        return res.status(500).json({ message: "Server error", success: false });
     }
 };
