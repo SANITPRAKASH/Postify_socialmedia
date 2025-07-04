@@ -30,7 +30,7 @@ const Login = () => {
       });
 
       if (res.data.success) {
-        dispatch(setAuthUser(res.data.user));
+        dispatch(setAuthUser(res.data.user));//as soon as user login enter the res.data.user into the redux store ,so now in the store we hav the user using this user in the store we do other functionality like showing the user profile, etc. now check the leftsidebar component.
         navigate("/");
         toast.success(res.data.message);
         setInput({ email: "", password: "" });
@@ -111,7 +111,7 @@ const Login = () => {
         }
 
         <span className="text-center text-white/80">
-          Don&apos;t have an account? <Link to="/signup" className="text-blue-300 hover:text-blue-200 transition-colors">Signup</Link>
+          Don&apos;t have an account? <Link to="/signup" className=" border-b text-blue-300 hover:text-blue-200 transition-colors">Signup</Link>
         </span>
       </form>
 

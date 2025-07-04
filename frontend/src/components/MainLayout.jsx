@@ -9,7 +9,7 @@ const MainLayout = () => {
 
   return (
     <div
-      className={`min-h-screen flex flex-row transition-colors duration-300 ${
+      className={`min-h-screen flex flex-col md:flex-row transition-colors duration-300 ${
         darkMode ? 'bg-[#0B0B2A]' : 'bg-[#f0f4ff]'
       }`}
       style={{
@@ -18,15 +18,17 @@ const MainLayout = () => {
           : 'linear-gradient(135deg, #e0e8ff 0%, #f5edff 100%)'
       }}
     >
-      {/* 🌈 Dreamy Floating Background Blobs */}
+      {/* 🌈 Dreamy Background Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[10%] left-[15%] w-64 h-64 rounded-full bg-[#8A2BE2] opacity-10 blur-3xl"></div>
         <div className="absolute bottom-[20%] right-[10%] w-80 h-80 rounded-full bg-[#FF1493] opacity-10 blur-3xl"></div>
         <div className="absolute top-[40%] right-[25%] w-72 h-72 rounded-full bg-[#00FFFF] opacity-10 blur-3xl"></div>
       </div>
 
-      {/* Sidebar */}
-      <LeftSidebar darkMode={darkMode} />
+      {/* Sidebar - hidden on small screens */}
+      <div className="hidden md:flex">
+        <LeftSidebar darkMode={darkMode} />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col relative z-10">
@@ -39,7 +41,7 @@ const MainLayout = () => {
           }`}
         >
           <h1
-            className={`text-2xl font-bold tracking-wider ${
+            className={`text-xl md:text-2xl font-bold tracking-wider ${
               darkMode ? 'text-white' : 'text-[#8A2BE2]'
             }`}
             style={{
@@ -52,7 +54,7 @@ const MainLayout = () => {
           </h1>
 
           <div
-            className={`relative max-w-md w-full mx-4 ${
+            className={`hidden sm:block relative max-w-md w-full mx-4 ${
               darkMode ? 'text-white' : 'text-gray-800'
             }`}
           >
@@ -90,9 +92,28 @@ const MainLayout = () => {
         </header>
 
         {/* Page Content */}
-        <div className="p-6 pt-8 ml-20">
+        <div className="p-4 pt-6 md:pt-8 md:ml-20">
           <Outlet context={{ darkMode }} />
         </div>
+      </div>
+
+      {/* 📱 Mobile Bottom Navbar */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full h-16 z-50 bg-white/30 dark:bg-[#1a1a2e]/50 backdrop-blur-xl border-t border-gray-300 dark:border-gray-700 flex justify-around items-center">
+        <button className="text-[#8A2BE2] dark:text-white">
+          <i className="fas fa-home text-lg"></i>
+        </button>
+        <button className="text-[#8A2BE2] dark:text-white">
+          <i className="fas fa-search text-lg"></i>
+        </button>
+        <button className="text-[#8A2BE2] dark:text-white">
+          <i className="fas fa-plus-circle text-2xl"></i>
+        </button>
+        <button className="text-[#8A2BE2] dark:text-white">
+          <i className="fas fa-envelope text-lg"></i>
+        </button>
+        <button className="text-[#8A2BE2] dark:text-white">
+          <i className="fas fa-user text-lg"></i>
+        </button>
       </div>
     </div>
   )

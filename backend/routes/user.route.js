@@ -7,6 +7,7 @@ import {
   login,
   logout,
   register,
+  deleteUser
 } from "../controllers/user.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js"
 import upload from "../middlewares/multer.js";
@@ -33,5 +34,10 @@ router.route('/suggested').get(isAuthenticated, getSuggestedUsers);
 
 // Follow/unfollow route for users to follow or unfollow other users
 router.route('/followorunfollow/:id').post(isAuthenticated, followOrUnfollow);
+
+// Delete user account
+router.route('/delete').delete(isAuthenticated, deleteUser);
+
+
 
 export default router;

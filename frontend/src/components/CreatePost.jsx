@@ -1,134 +1,142 @@
-import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Link } from 'react-router-dom';
-import { MoreHorizontal } from 'lucide-react';
-import { Button } from './ui/button';
-import { useDispatch, useSelector } from 'react-redux';
-import Comment from './Comment.jsx';
-import axios from 'axios';
-import { toast } from 'sonner';
-import { setPosts } from '@/redux/postSlice';
+import { useRef, useState } from "react";
+import { Dialog, DialogContent, DialogHeader } from "./ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Textarea } from "./ui/textarea";
+import { Button } from "./ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setPosts } from "@/redux/postSlice";
+import PropTypes from "prop-types";
+import Cropper from "react-easy-crop";
+import getCroppedImg from "@/lib/cropImage"; // your crop function
 
-const CommentDialog = ({ open, setOpen }) => {
-  const [text, setText] = useState(""); // To store the comment text
-  const { selectedPost, posts } = useSelector(store => store.post); // Fetch selected post and all posts from the store
-  const [comment, setComment] = useState([]); // To store the current comments for the selected post
+const CreatePost = ({ open, setOpen }) => {
+  const imageRef = useRef();
+  const [caption, setCaption] = useState("");
+  const [imagePreview, setImagePreview] = useState("");
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [cropMode, setCropMode] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  const { user } = useSelector((store) => store.auth);
+  const { posts } = useSelector((store) => store.post);
   const dispatch = useDispatch();
 
-  // Effect hook to set comments when the selectedPost changes
-  useEffect(() => {
-    if (selectedPost) {
-      setComment(selectedPost.comments); // Update the comment state with the selected post's comments
-    }
-  }, [selectedPost]);
-
-  // Event handler for input change to set the comment text
-  const changeEventHandler = (e) => {
-    const inputText = e.target.value;
-    setText(inputText.trim() ? inputText : ""); // Set text only if not empty
+  const fileChangeHandler = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result);
+      setCropMode(true);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Send the comment when user clicks "Send"
-  const sendMessageHandler = async () => {
+  const onCropComplete = (_, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const cropImageAndPost = async () => {
     try {
-      const res = await axios.post(`http://localhost:8000/api/v1/post/${selectedPost?._id}/comment`, { text }, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        withCredentials: true
+      setLoading(true);
+      const croppedFile = await getCroppedImg(imagePreview, croppedAreaPixels);
+      const formData = new FormData();
+      formData.append("caption", caption);
+      formData.append("image", croppedFile);
+
+      const res = await axios.post("http://localhost:8000/api/v1/post/addpost", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
       });
 
       if (res.data.success) {
-        const updatedCommentData = [...comment, res.data.comment]; // Add the new comment
-        setComment(updatedCommentData); // Update the local comment state
-
-        const updatedPostData = posts.map(p =>
-          p._id === selectedPost._id ? { ...p, comments: updatedCommentData } : p
-        ); // Update the post with the new comment
-        dispatch(setPosts(updatedPostData)); // Update the Redux store
-        toast.success(res.data.message); // Show success message
-        setText(""); // Clear the input field
+        dispatch(setPosts([res.data.post, ...posts]));
+        toast.success(res.data.message);
+        setOpen(false);
       }
-    } catch (error) {
-      console.log(error); // Handle any errors
+    } catch {
+      toast.error("Image upload failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Dialog open={open}>
-      <DialogContent onInteractOutside={() => setOpen(false)} className="max-w-5xl p-0 flex flex-col">
-        {/* Dialog content for the comment section */}
-        <div className='flex flex-1'>
-          {/* Left side: Post image */}
-          <div className='w-1/2'>
-            <img
-              src={selectedPost?.image}
-              alt="post_img"
-              className='w-full h-full object-cover rounded-l-lg'
+      <DialogContent onInteractOutside={() => setOpen(false)}>
+        <DialogHeader className="text-center font-semibold">Create New Post</DialogHeader>
+
+        <div className="flex gap-3 items-center">
+          <Avatar>
+            <AvatarImage src={user?.profilePicture} />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <h1 className="font-semibold text-xs">{user?.username}</h1>
+        </div>
+
+        <Textarea
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          className="focus-visible:ring-transparent border-none"
+          placeholder="Write a caption..."
+        />
+
+        {imagePreview && cropMode && (
+          <div className="relative w-full h-64 bg-black">
+            <Cropper
+              image={imagePreview}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
             />
           </div>
+        )}
 
-          {/* Right side: Post author, comments and comment input */}
-          <div className='w-1/2 flex flex-col justify-between'>
-            <div className='flex items-center justify-between p-4'>
-              {/* Post author information */}
-              <div className='flex gap-3 items-center'>
-                <Link>
-                  <Avatar>
-                    <AvatarImage src={selectedPost?.author?.profilePicture} />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                </Link>
-                <div>
-                  <Link className='font-semibold text-xs'>{selectedPost?.author?.username}</Link>
-                </div>
-              </div>
+        <input
+          ref={imageRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={fileChangeHandler}
+        />
 
-              {/* More options for the post */}
-              <Dialog>
-                <DialogTrigger asChild>
-                  <MoreHorizontal className='cursor-pointer' />
-                </DialogTrigger>
-                <DialogContent className="flex flex-col items-center text-sm text-center">
-                  <div className='cursor-pointer w-full text-[#ED4956] font-bold'>
-                    Unfollow
-                  </div>
-                  <div className='cursor-pointer w-full'>
-                    Add to favorites
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <hr />
-            <div className='flex-1 overflow-y-auto max-h-96 p-4'>
-              {/* Render the list of comments */}
-              {comment.map((comment) => <Comment key={comment._id} comment={comment} />)}
-            </div>
-            <div className='p-4'>
-              {/* Input field for adding a comment */}
-              <div className='flex items-center gap-2'>
-                <input
-                  type="text"
-                  value={text}
-                  onChange={changeEventHandler}
-                  placeholder='Add a comment...'
-                  className='w-full outline-none border text-sm border-gray-300 p-2 rounded'
-                />
-                <Button
-                  disabled={!text.trim()} // Disable the button if the text is empty
-                  onClick={sendMessageHandler}
-                  variant="outline"
-                >
-                  Send
-                </Button>
-              </div>
-            </div>
+        <Button
+          onClick={() => imageRef.current.click()}
+          className="w-fit mx-auto bg-gradient-to-r from-purple-600 via-indigo-600 to-violet-700 text-white hover:brightness-110 transition-all duration-300"
+        >
+          Select from computer
+        </Button>
+
+        {imagePreview && (
+          <div className="w-full mt-3">
+            {loading ? (
+              <Button disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Please wait
+              </Button>
+            ) : (
+              <Button onClick={cropImageAndPost} className="w-full">
+                Post
+              </Button>
+            )}
           </div>
-        </div>
+        )}
       </DialogContent>
     </Dialog>
   );
 };
 
-export default CommentDialog;
+CreatePost.propTypes = {
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
+};
+
+export default CreatePost;

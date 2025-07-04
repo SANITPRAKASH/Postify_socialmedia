@@ -110,32 +110,45 @@ export const getProfile = async (req, res) => {
 
 // Edit Profile
 export const editProfile = async (req, res) => {
-    try {
-        const userId = req.id;
-        const { bio, gender } = req.body;
-        const profilePicture = req.file;
+  try {
+    const userId = req.id;
+    const { bio, gender, username } = req.body;
+    const profilePicture = req.file;
 
-        const user = await User.findById(userId).select('-password');
-        if (!user) {
-            return res.status(404).json({ message: "User not found", success: false });
-        }
-
-        if (bio) user.bio = bio;
-        if (gender) user.gender = gender;
-
-        if (profilePicture) {
-            const fileUri = getDataUri(profilePicture);
-            const uploadResponse = await cloudinary.uploader.upload(fileUri);
-            user.profilePicture = uploadResponse.secure_url;
-        }
-
-        await user.save();
-        return res.status(200).json({ message: "Profile updated", success: true, user });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Server error", success: false });
+    const user = await User.findById(userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: "User not found", success: false });
     }
+
+    // 💡 Update bio & gender
+    if (bio) user.bio = bio;
+    if (gender) user.gender = gender;
+
+    // 🧠 Check if username is being changed
+    if (username && username !== user.username) {
+      const usernameExists = await User.findOne({ username });
+      if (usernameExists && usernameExists._id.toString() !== user._id.toString()) {
+        return res.status(400).json({ message: "Username already taken", success: false });
+      }
+      user.username = username;
+    }
+
+    // 🌩️ Upload profile photo if provided
+    if (profilePicture) {
+      const fileUri = getDataUri(profilePicture);
+      const uploadResponse = await cloudinary.uploader.upload(fileUri);
+      user.profilePicture = uploadResponse.secure_url;
+    }
+
+    await user.save();
+    return res.status(200).json({ message: "Profile updated", success: true, user });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
 };
+
 
 // Get Suggested Users
 export const getSuggestedUsers = async (req, res) => {
@@ -194,3 +207,38 @@ export const followOrUnfollow = async (req, res) => {
         return res.status(500).json({ message: "Server error", success: false });
     }
 };
+
+// Delete User
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Optional: delete all posts created by this user
+    await Post.deleteMany({ author: userId });
+
+    // Remove user from followers & following of others
+    await User.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } }
+    );
+    await User.updateMany(
+      { following: userId },
+      { $pull: { following: userId } }
+    );
+
+    // Finally delete the user
+    await User.findByIdAndDelete(userId);
+
+    return res
+      .status(200)
+      .clearCookie("token") // clear auth cookie
+      .json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+

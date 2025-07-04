@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import ProtectedRoutes from './components/ProtectedRoutes';
@@ -12,6 +12,7 @@ import socketService from './lib/socketService';
 import { setSocketId, setConnectionStatus } from './redux/socketSlice';
 import { setOnlineUsers, setMessages } from './redux/chatSlice';
 import { setLikeNotification, setMessageNotification } from './redux/rtnSlice';
+import EditProfile from './components/EditProfile';
 
 const browserRouter = createBrowserRouter([
   {
@@ -20,6 +21,9 @@ const browserRouter = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/profile/:id', element: <Profile /> },
+      {
+        path: '/account/edit', element: <ProtectedRoutes><EditProfile /></ProtectedRoutes>
+      },
       { path: '/chat', element: <ChatPage /> },
     ],
   },

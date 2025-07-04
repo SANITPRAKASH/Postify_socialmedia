@@ -37,9 +37,9 @@ router.route("/:id/comment").post(isAuthenticated, addComment);
 router.route("/:id/comment/all").post(isAuthenticated, getCommentsOfPost);
 
 // Route to delete a post
-router.route("/delete/:id").post(isAuthenticated, deletePost);
+router.route("/delete/:id").delete(isAuthenticated, deletePost);
 
 // Route to bookmark a post
-router.route("/:id/bookmark").post(isAuthenticated, bookmarkPost);
+router.route("/:id/bookmark").get(isAuthenticated, bookmarkPost);
 
 export default router;

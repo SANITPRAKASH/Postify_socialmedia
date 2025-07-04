@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((store) => store.auth);
+  const { user } = useSelector((store) => store.auth);//we now have login res.data.user in store, to use this user we subscribe/get from store to do that useSelector
   const { likeNotification = [], messageNotification = [] } = useSelector(
     (store) => store.realTimeNotification
   );
@@ -26,6 +26,7 @@ const LeftSidebar = () => {
         withCredentials: true,
       });
       if (res.data.success) {
+        //on logout clear all the redux store data
         dispatch(setAuthUser(null));
         dispatch(setSelectedPost(null));
         dispatch(setPosts([]));
