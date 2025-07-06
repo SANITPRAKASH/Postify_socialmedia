@@ -43,7 +43,7 @@ const CommentDialog = ({ open, setOpen }) => {
       );
 
       if (res.data.success) {
-        const updatedCommentData = [...comment, res.data.comment]; // ✅ Use it directly
+        const updatedCommentData = [...comment, res.data.comment];
         setComment(updatedCommentData);
 
         const updatedPostData = posts.map((p) =>
@@ -61,7 +61,32 @@ const CommentDialog = ({ open, setOpen }) => {
     }
   };
 
-  if (!selectedPost) return null; // If no post is selected, return null to avoid rendering the dialog{
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const res = await axios.delete(
+        `http://localhost:8000/api/v1/post/${selectedPost._id}/comment/${commentId}/delete`,
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        const updatedCommentData = comment.filter((c) => c._id !== commentId);
+        setComment(updatedCommentData);
+
+        const updatedPostData = posts.map((p) =>
+          p._id === selectedPost._id
+            ? { ...p, comments: updatedCommentData }
+            : p
+        );
+        dispatch(setPosts(updatedPostData));
+        toast.success("Comment deleted");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed");
+    }
+  };
+
+  if (!selectedPost) return null;
+
   return (
     <Dialog open={open}>
       <DialogContent
@@ -140,7 +165,12 @@ const CommentDialog = ({ open, setOpen }) => {
             {/* Comments Scroll */}
             <div className="flex-1 overflow-y-auto max-h-96 p-4 space-y-3">
               {comment.map((c) => (
-                <Comment key={c._id} comment={c} />
+                <Comment
+                  key={c._id}
+                  comment={c}
+                  postId={selectedPost._id}
+                  onDelete={handleDeleteComment}
+                />
               ))}
             </div>
 

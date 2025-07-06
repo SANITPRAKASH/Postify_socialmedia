@@ -1,21 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
 const postSlice = createSlice({
-    name:'post',
-    initialState:{
-        posts:[],
-        selectedPost:null,
+  name: "post",
+  initialState: {
+    posts: [],
+    selectedPost: null,
+  },
+  reducers: {
+    setPosts: (state, action) => {
+      state.posts = action.payload;
     },
-    reducers:{
-        //actions
-        setPosts:(state,action) => {
-            state.posts = action.payload;
-        },
-        //action to to setpost from the getallpost hook inside this slice to view it in feed/posts
-        setSelectedPost:(state,action) => {
-            state.selectedPost = action.payload;
-        }
-        //action to set the selected post when we click on a post to view it in detail or modify it
-    }
+    setSelectedPost: (state, action) => {
+      state.selectedPost = action.payload;
+    },
+    deleteCommentFromPost: (state, action) => {
+      const { postId, commentId } = action.payload;
+      const postIndex = state.posts.findIndex((p) => p._id === postId);
+      if (postIndex !== -1) {
+        state.posts[postIndex].comments = state.posts[
+          postIndex
+        ].comments.filter((c) => c._id !== commentId);
+      }
+
+      // if selected post is open (like in modal), update that too
+      if (state.selectedPost && state.selectedPost._id === postId) {
+        state.selectedPost.comments = state.selectedPost.comments.filter(
+          (c) => c._id !== commentId
+        );
+      }
+    },
+  },
 });
-export const {setPosts, setSelectedPost} = postSlice.actions;
+export const { setPosts, setSelectedPost, deleteCommentFromPost  } = postSlice.actions;
 export default postSlice.reducer;

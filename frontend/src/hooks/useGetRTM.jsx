@@ -3,21 +3,27 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 const useGetRTM = () => {
-    const dispatch = useDispatch();
-    const { socket } = useSelector(store => store.socketio);
+  const dispatch = useDispatch();
+  const { socket } = useSelector((store) => store.socketio);
+  const { messages } = useSelector((store) => store.chat);
 
-    useEffect(() => {
-        const handleNewMessage = (newMessage) => {
-            // Use the previous state to ensure correct updates
-            dispatch(setMessages(prevMessages => [...prevMessages, newMessage]));
-        };
+  useEffect(() => {
+    if (!socket) return;
 
-        socket?.on('newMessage', handleNewMessage);
+    const handleNewMessage = (newMessage) => {
+      const updatedMessages = [...messages, newMessage];
+      dispatch(setMessages(updatedMessages));
+    };
 
-        return () => {
-            socket?.off('newMessage', handleNewMessage);
-        };
-    }, [dispatch, socket]); // Now, only `dispatch` and `socket` are dependencies
+    socket.on("newMessage", handleNewMessage);
+
+    // 🧼 Cleanup safely
+    return () => {
+      if (socket) {
+        socket.off("newMessage", handleNewMessage);
+      }
+    };
+  }, [socket, messages, dispatch]);
 };
 
 export default useGetRTM;

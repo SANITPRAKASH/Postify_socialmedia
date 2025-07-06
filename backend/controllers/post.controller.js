@@ -103,7 +103,7 @@ export const likePost = async (req, res) => {
 
         // implement socket io for real time notification
         const user = await User.findById(userIdLiking).select('username, profilePicture');
-
+// remove myself liking the post from the notification
         const postOwnerId = post.author.toString();
         if(postOwnerId !== userIdLiking){
             // emit a notification event
@@ -112,6 +112,7 @@ export const likePost = async (req, res) => {
                 userId:userIdLiking,
                 userDetails:user,
                 postId,
+               
                 message:'Your post was liked'
             }
             const postOwnerSocketId = getReceiverSocketId(postOwnerId);
@@ -264,4 +265,30 @@ export const bookmarkPost = async (req, res) => {
         console.log(error);
     }
 }
- 
+export const deleteComment = async (req, res) => {
+  const { postId, commentId } = req.params;
+  const userId = req.id;
+
+  const post = await Post.findById(postId);
+  if (!post) {
+    return res.status(404).json({ success: false, message: "Post not found" });
+  }
+
+  const comment = await Comment.findById(commentId);
+  if (!comment) {
+    return res.status(404).json({ success: false, message: "Comment not found" });
+  }
+
+  if (comment.author.toString() !== userId.toString()) {
+    return res.status(403).json({ success: false, message: "Unauthorized" });
+  }
+
+  await Comment.findByIdAndDelete(commentId);
+
+  // Pull the comment ref from Post.comments array
+  await Post.findByIdAndUpdate(postId, {
+    $pull: { comments: commentId }
+  });
+
+  return res.status(200).json({ success: true, message: "Comment deleted" });
+};

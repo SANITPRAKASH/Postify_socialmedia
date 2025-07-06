@@ -93,20 +93,26 @@ export const logout = (_, res) => {
 
 // Get User Profile
 export const getProfile = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        let user = await User.findById(userId).select("-password").populate("posts").populate("bookmarks");
+  try {
+    const userId = req.params.id;
+    let user = await User.findById(userId)
+      .select("-password")
+      .populate("posts")
+      .populate("bookmarks")
+      .populate("followers", "username profilePicture") // 💥 required for UI
+      .populate("following", "username profilePicture"); // 💥 required for UI
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found", success: false });
-        }
-
-       return  res.status(200).json({ user, success: true });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: "Server error", success: false });
+    if (!user) {
+      return res.status(404).json({ message: "User not found", success: false });
     }
+
+    return res.status(200).json({ user, success: true });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error", success: false });
+  }
 };
+
 
 // Edit Profile
 export const editProfile = async (req, res) => {

@@ -13,12 +13,12 @@ dotenv.config(); // Load environment variables from the .env file
 
 const PORT = process.env.PORT || 8000; // Set the port from the environment variables or default to 3000
 // Catch-all route to serve the frontend for any unmatched request
-app.get("/", (_, res) => {
-    return res.status(200).json({
-        message:"im coming from backend server",
-        success:true,
-    })
-});
+// app.get("/", (_, res) => {
+//     return res.status(200).json({
+//         message:"im coming from backend server",
+//         success:true,
+//     })
+// });
 // const __dirname = path.resolve(); // Resolve the directory path for static files
 
 // Middlewares

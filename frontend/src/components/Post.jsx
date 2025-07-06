@@ -1,8 +1,8 @@
 // Post.jsx
-import { useState } from "react";
+import { useState} from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { Bookmark, MessageCircle, MoreHorizontal, Send } from "lucide-react";
+import { Bookmark, MessageCircle, MoreHorizontal, Send, UserPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import CommentDialog from "./CommentDialogue.jsx";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import { Badge } from "./ui/badge";
 import { Card } from "./ui/card";
-import {Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const Post = ({ post }) => {
@@ -90,6 +90,27 @@ const Post = ({ post }) => {
     }
   };
 
+  const handleFollowToggle = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8000/api/v1/user/followorunfollow/${post?.author?._id}`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        toast.success(
+          res.data.message.includes("Unfollowed")
+            ? `You unfollowed @${post.author.username}`
+            : `You're now following @${post.author.username}`
+        );
+      }
+    } catch (err) {
+      console.error("Follow/unfollow failed", err);
+      toast.error("Action failed. Try again.");
+    }
+  };
+
   const deletePostHandler = async () => {
     try {
       const res = await axios.delete(
@@ -97,8 +118,8 @@ const Post = ({ post }) => {
         { withCredentials: true }
       );
       if (res.data.success) {
-        const updatedPostData = posts.filter((p) => p?._id !== post?._id);// filter out the deleted post and only keep the rest
-        dispatch(setPosts(updatedPostData));//update the posts in the redux store
+        const updatedPostData = posts.filter((p) => p?._id !== post?._id);
+        dispatch(setPosts(updatedPostData));
         toast.success(res.data.message);
       }
     } catch (error) {
@@ -119,7 +140,7 @@ const Post = ({ post }) => {
     }
   };
 
-  if (!post) return null; // If no post is provided, return null to avoid rendering the component
+  if (!post) return null;
 
   return (
     <Card
@@ -144,7 +165,6 @@ const Post = ({ post }) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-2">
-            
             <Link to={`/profile/${post.author?._id}`}>
               <h1
                 className={`font-semibold text-sm ${
@@ -163,18 +183,37 @@ const Post = ({ post }) => {
           <DialogTrigger asChild>
             <MoreHorizontal className="cursor-pointer text-gray-500 hover:text-gray-700" />
           </DialogTrigger>
-          <DialogContent className="flex flex-col items-center text-sm text-center">
+          <DialogContent
+            className={`rounded-xl w-[260px] py-6 px-4 border-none ${
+              darkMode
+                ? "bg-[rgba(20,20,30,0.95)] text-white"
+                : "bg-white text-gray-800"
+            } flex flex-col items-center gap-4`}
+          >
             {post?.author?._id !== user?._id && (
-              <Button variant="ghost" className="text-[#ED4956] font-bold">
-                Unfollow
+              <Button
+                onClick={handleFollowToggle}
+                variant="outline"
+                className="w-full flex gap-2 items-center justify-center text-sm font-medium border-gray-400 hover:bg-[#8A2BE2]/10"
+              >
+                <UserPlus size={18} />
+                Follow / Unfollow
               </Button>
             )}
-            <Button variant="ghost">Add to favorites</Button>
+
+            <Button
+              onClick={bookmarkHandler}
+              variant="ghost"
+              className="w-full text-sm hover:text-purple-600"
+            >
+              Add to favorites
+            </Button>
+
             {user && user?._id === post?.author._id && (
               <Button
                 onClick={deletePostHandler}
                 variant="ghost"
-                className="text-red-500"
+                className="w-full text-sm text-red-500 hover:bg-red-100/10"
               >
                 Delete
               </Button>
@@ -257,7 +296,6 @@ const Post = ({ post }) => {
           </span>
         )}
 
-        {/* 💬 Always render the dialog */}
         <CommentDialog open={open} setOpen={setOpen} />
       </div>
 

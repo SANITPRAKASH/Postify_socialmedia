@@ -5,12 +5,14 @@ import {
   addComment,
   addNewPost,
   bookmarkPost,
+  deleteComment,
   deletePost,
   dislikePost,
   getAllPost,
   getCommentsOfPost,
   getUserPost,
   likePost,
+  
 } from "../controllers/post.controller.js";
 
 const router = express.Router();
@@ -41,5 +43,8 @@ router.route("/delete/:id").delete(isAuthenticated, deletePost);
 
 // Route to bookmark a post
 router.route("/:id/bookmark").get(isAuthenticated, bookmarkPost);
+
+// Route to delete a comment on a post
+router.route("/:postId/comment/:commentId/delete").delete(isAuthenticated, deleteComment);
 
 export default router;

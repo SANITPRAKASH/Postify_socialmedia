@@ -26,7 +26,7 @@ const Home = () => {
       </div>
 
       {/* Right sidebar - fixed to right edge, hidden on mobile */}
-      <div className="hidden lg:block w-80 fixed right-0 top-0 bottom-0   pt-16">
+      <div className="hidden lg:block w-96 fixed right-0 top-0 bottom-0 pt-16">
         <RightSidebar darkMode={darkMode} />
       </div>
     </div>
