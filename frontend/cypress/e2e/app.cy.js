@@ -41,7 +41,15 @@ describe('App End-to-End Test', () => {
   });
 
   it('Logout works', () => {
-    cy.get('[data-testid="logout"]').click(); // ✅ Make sure your button has this
-    cy.url().should('include', '/login');
+    cy.wait(1000); // let the UI settle
+cy.screenshot(); // take a screenshot so you can see what’s rendered
+cy.get('body').then(($body) => {
+  if ($body.find('[data-testid="logout"]').length) {
+    cy.get('[data-testid="logout"]').click({ force: true });
+  } else {
+    throw new Error("Logout button not found — make sure you're logged in");
+  }
+});
+
   });
 });

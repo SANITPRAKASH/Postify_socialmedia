@@ -83,6 +83,7 @@ export const login = async (req, res) => {
 // Logout User
 export const logout = (_, res) => {
     try {
+        res.set("Cache-Control", "no-store")
         return res.cookie("token", "", { maxAge: 0 }).json({ message: "Logged out successfully.", success: true });
         
     } catch (error) {
