@@ -3,12 +3,17 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "test": "cypress open",         
+  "test:ci": "cypress run",       
+  "start": "vite preview"         
+}
+
+,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@radix-ui/react-avatar": "^1.1.2",
@@ -43,6 +48,7 @@
     "@types/react-easy-crop": "^1.16.0",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "cypress": "^14.5.1",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",

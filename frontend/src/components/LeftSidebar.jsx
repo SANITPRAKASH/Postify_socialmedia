@@ -178,6 +178,7 @@ const LeftSidebar = () => {
               size="icon"
               variant="ghost"
               onClick={() => sidebarHandler(item.text)}
+              data-testid={item.text === "Logout" ? "logout" : undefined} 
               className="w-11 h-11 flex items-center justify-center rounded-lg 
               bg-[rgba(0,0,0,0.05)] dark:bg-[#222255] 
               hover:bg-[#8A2BE2] hover:text-white 

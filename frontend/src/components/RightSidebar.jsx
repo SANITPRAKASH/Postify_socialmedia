@@ -54,7 +54,7 @@ const RightSidebar = ({ darkMode }) => {
 
       {/* Suggested Users */}
       <div>
-        <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-white">
+        <h3 className="text-sm font-semibold mb-3 text-gray-500 dark:text-white">
           Suggested Users & People You May Know
         </h3>
         <SuggestedUsers darkMode={darkMode} />
