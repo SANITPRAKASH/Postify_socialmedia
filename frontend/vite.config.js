@@ -10,6 +10,6 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 4173, // 🔐 lock this for GitHub Actions
+    port: 5173, // 🔐 lock this for GitHub Actions
   },
 });

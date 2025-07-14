@@ -37,11 +37,11 @@ jobs:
         working-directory: ./frontend
         run: |
           npm run preview &
-          npx wait-on http://localhost:4173
+          npx wait-on http://localhost:5173
 
       - name: 🧪 Run Cypress tests
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./frontend
-          wait-on: http://localhost:4173
+          wait-on: http://localhost:5173
           browser: chrome
