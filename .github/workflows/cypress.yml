@@ -29,19 +29,6 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - name: ⚒ Build the app
-        working-directory: ./frontend
-        run: npm run build
-
-      - name: 🌐 Serve Vite preview
-        working-directory: ./frontend
-        run: |
-          npm run preview &
-          npx wait-on http://localhost:5173
-
       - name: 🧪 Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: ./frontend
-          wait-on: http://localhost:5173
-          browser: chrome
+        working-directory: ./frontend
+        run: npm run test:ci
