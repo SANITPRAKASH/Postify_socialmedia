@@ -43,6 +43,5 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: ./frontend
-          start: npm run preview
           wait-on: http://localhost:4173
           browser: chrome
