@@ -9,7 +9,7 @@
   "lint": "eslint .",
   "preview": "vite preview",
   "start": "vite preview",
-  "serve": "vite preview",                              
+  "serve": "vite preview --host",                              
   "test": "cypress open",
   "test:e2e": "cypress run",                            
   "test:ci": "start-server-and-test serve http://localhost:5173 test:e2e" 
