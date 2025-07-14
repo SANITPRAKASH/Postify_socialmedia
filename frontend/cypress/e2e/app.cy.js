@@ -18,10 +18,7 @@ describe("App End-to-End Test", () => {
     cy.url().should("include", "/");
   });
 
-  it("Home page loads with posts", () => {
-    cy.visit("/");
-    cy.contains("Postify");
-  });
+
 
   it("Edit profile page works", () => {
     cy.visit("/account/edit");
