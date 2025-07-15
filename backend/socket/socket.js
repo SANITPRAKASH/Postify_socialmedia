@@ -8,7 +8,7 @@ const server = http.createServer(app);
 // Setup Socket.IO server
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173 ",  // Allow connections from a specific URL (set this in your .env file)
+        origin: "https://postify-wyo1.onrender.com",  // Allow connections from a specific URL (set this in your .env file)
         methods: ['GET', 'POST']  // Allow only GET and POST methods for CORS
     }
 });
