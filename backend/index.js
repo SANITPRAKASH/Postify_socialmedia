@@ -27,7 +27,7 @@ app.use(urlencoded({ extended: true })); // Middleware to parse URL-encoded data
 
 // CORS configuration
 const corsOptions = {
-    origin: 'http://localhost:5173', // Allow only requests from the specified origin
+    origin: 'https://postify-wyo1.onrender.com', // Allow only requests from the specified origin
     credentials: true, // Allow credentials (cookies) to be sent with the request
 };
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options
