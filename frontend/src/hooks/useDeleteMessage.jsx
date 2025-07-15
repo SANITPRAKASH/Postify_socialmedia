@@ -8,7 +8,7 @@ const useDeleteMessage = () => {
 
   const deleteMessage = async (messageId) => {
     try {
-      const res = await axios.delete(`http://localhost:8000/api/v1/message/delete/${messageId}`, { withCredentials: true });
+      const res = await axios.delete(`https://postify-socialmedia.onrender.com/api/v1/message/delete/${messageId}`, { withCredentials: true });
       if (res.data?.success) {
         dispatch(deleteMessageFromStore(messageId));
         toast.success("Message deleted successfully ✨");

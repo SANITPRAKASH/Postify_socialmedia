@@ -32,7 +32,7 @@ const CommentDialog = ({ open, setOpen }) => {
   const sendMessageHandler = async () => {
     try {
       const res = await axios.post(
-        `http://localhost:8000/api/v1/post/${selectedPost?._id}/comment`,
+        `https://postify-socialmedia.onrender.com/api/v1/post/${selectedPost?._id}/comment`,
         { text },
         {
           headers: {
@@ -64,7 +64,7 @@ const CommentDialog = ({ open, setOpen }) => {
   const handleDeleteComment = async (commentId) => {
     try {
       const res = await axios.delete(
-        `http://localhost:8000/api/v1/post/${selectedPost._id}/comment/${commentId}/delete`,
+        `https://postify-socialmedia.onrender.com/api/v1/post/${selectedPost._id}/comment/${commentId}/delete`,
         { withCredentials: true }
       );
       if (res.data.success) {

@@ -12,7 +12,7 @@ const useGetAllMessage = () => {
 
         const fetchAllMessage = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/api/v1/message/all/${selectedUser._id}`, { withCredentials: true });
+                const res = await axios.get(`https://postify-socialmedia.onrender.com/api/v1/message/all/${selectedUser._id}`, { withCredentials: true });
                 if (res.data.success) {  
                     console.log("💬 messages:", res.data.messages);
                     dispatch(setMessages(res.data.messages));

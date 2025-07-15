@@ -39,7 +39,7 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      const socketio = io('http://localhost:8000', {
+      const socketio = io('https://postify-socialmedia.onrender.com', {
         query: {
           userId: user?._id
         },

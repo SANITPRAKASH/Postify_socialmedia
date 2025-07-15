@@ -19,7 +19,6 @@ const PORT = process.env.PORT || 8000; // Set the port from the environment vari
 //         success:true,
 //     })
 // });
-// const __dirname = path.resolve(); // Resolve the directory path for static files
 
 // Middlewares
 app.use(express.json()); // Middleware to parse JSON requests
@@ -38,8 +37,7 @@ app.use("/api/v1/user", userRoute); // User-related routes
 app.use("/api/v1/post", postRoute); // Post-related routes
 app.use("/api/v1/message", messageRoute); // Message-related routes
 
-// Serving static files from frontend
-// app.use(express.static(path.join(__dirname, "/frontend/dist")));
+
 
 
 
