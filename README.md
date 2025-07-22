@@ -22,8 +22,6 @@ Sign up and Login functionality
 Feed
 
 https://github.com/user-attachments/assets/175c21c9-36cf-4e6b-a744-3736aa194673
-<img width="1366" height="687" alt="image" src="https://github.com/user-attachments/assets/21901224-b837-4ce5-abcc-97f47021cd9d" />
-<img width="1366" height="687" alt="image" src="https://github.com/user-attachments/assets/0abe8c9b-999a-4c66-973a-c2c6f0a4b87d" />
 
 
 
